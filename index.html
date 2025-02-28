@@ -34,24 +34,25 @@
             console.log("Клик по карте:", currentCoords);
         });
 
-        // Проверяем, доступен ли Telegram WebApp
-        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-            console.log("Telegram WebApp инициализирован.");
+        // Проверяем Telegram WebApp
+        console.log("Проверка Telegram:", typeof Telegram !== 'undefined' ? "Telegram доступен" : "Telegram не доступен");
+        if (Telegram && Telegram.WebApp) {
+            console.log("Telegram WebApp готов:", Telegram.WebApp.isReady ? "Да" : "Нет");
             Telegram.WebApp.ready();
         } else {
-            console.error("Telegram WebApp не доступен!");
+            console.error("Telegram WebApp не работает!");
         }
 
         function sendData() {
             const data = { lat: currentCoords[0], lon: currentCoords[1] };
-            console.log("Отправляем данные:", JSON.stringify(data));
+            console.log("Пробуем отправить:", JSON.stringify(data));
             if (Telegram && Telegram.WebApp && Telegram.WebApp.isReady) {
                 Telegram.WebApp.sendData(JSON.stringify(data));
-                console.log("Данные отправлены.");
+                console.log("Данные отправлены в бот!");
                 Telegram.WebApp.close();
             } else {
-                console.error("Telegram WebApp не готов или недоступен!");
-                alert("Ошибка: Telegram WebApp не готов.");
+                console.error("Ошибка: Telegram WebApp не готов!");
+                alert("Ошибка: Telegram Web App не готов.");
             }
         }
     </script>
