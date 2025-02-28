@@ -23,25 +23,34 @@
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
         let marker = L.marker(currentCoords, { draggable: true }).addTo(map);
+
         marker.on('dragend', function(e) {
             currentCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
+            console.log("Метка перемещена:", currentCoords);
         });
         map.on('click', function(e) {
             currentCoords = [e.latlng.lat, e.latlng.lng];
             marker.setLatLng(e.latlng);
+            console.log("Клик по карте:", currentCoords);
         });
+
+        console.log("Telegram WebApp инициализирован:", typeof Telegram !== 'undefined' && Telegram.WebApp);
 
         function sendData() {
             const data = { lat: currentCoords[0], lon: currentCoords[1] };
             console.log("Отправляем данные:", JSON.stringify(data));
-            if (Telegram && Telegram.WebApp) {
+            if (Telegram && Telegram.WebApp && Telegram.WebApp.ready) {
                 Telegram.WebApp.sendData(JSON.stringify(data));
+                console.log("Данные отправлены успешно");
                 Telegram.WebApp.close();
             } else {
-                console.error("Telegram WebApp API недоступен!");
-                alert("Ошибка: Telegram WebApp не инициализирован.");
+                console.error("Ошибка: Telegram WebApp не доступен или не готов!");
+                alert("Ошибка: Telegram WebApp не работает.");
             }
         }
+
+        // Убедимся, что WebApp готов
+        Telegram.WebApp.ready();
     </script>
 </body>
 </html>
