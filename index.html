@@ -32,14 +32,14 @@
         });
 
         function sendData() {
-            if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-                let data = { lat: currentCoords[0], lon: currentCoords[1] };
-                console.log("Отправляем данные:", data);
+            const data = { lat: currentCoords[0], lon: currentCoords[1] };
+            console.log("Отправляем данные:", JSON.stringify(data));
+            if (Telegram && Telegram.WebApp) {
                 Telegram.WebApp.sendData(JSON.stringify(data));
                 Telegram.WebApp.close();
             } else {
-                console.error("Telegram.WebApp не доступен!");
-                alert("Ошибка: Telegram WebApp не работает.");
+                console.error("Telegram WebApp API недоступен!");
+                alert("Ошибка: Telegram WebApp не инициализирован.");
             }
         }
     </script>
