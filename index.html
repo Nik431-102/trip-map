@@ -37,7 +37,7 @@
         // Проверяем Telegram WebApp
         console.log("Проверка Telegram:", typeof Telegram !== 'undefined' ? "Telegram доступен" : "Telegram не доступен");
         if (Telegram && Telegram.WebApp) {
-            console.log("Telegram WebApp готов:", Telegram.WebApp.isReady ? "Да" : "Нет");
+            console.log("Telegram WebApp доступен, инициализируем...");
             Telegram.WebApp.ready();
         } else {
             console.error("Telegram WebApp не работает!");
@@ -46,13 +46,13 @@
         function sendData() {
             const data = { lat: currentCoords[0], lon: currentCoords[1] };
             console.log("Пробуем отправить:", JSON.stringify(data));
-            if (Telegram && Telegram.WebApp && Telegram.WebApp.isReady) {
+            if (Telegram && Telegram.WebApp) {
                 Telegram.WebApp.sendData(JSON.stringify(data));
                 console.log("Данные отправлены в бот!");
                 Telegram.WebApp.close();
             } else {
-                console.error("Ошибка: Telegram WebApp не готов!");
-                alert("Ошибка: Telegram Web App не готов.");
+                console.error("Ошибка: Telegram WebApp недоступен!");
+                alert("Ошибка: Telegram Web App недоступен.");
             }
         }
     </script>
