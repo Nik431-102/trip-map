@@ -1,37 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Выбор точки</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        #map { height: 100vh; width: 100%; }
-        button { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 10px; font-size: 16px; }
-    </style>
+    <title>Trip Map</title>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 </head>
 <body>
-    <div id="map"></div>
-    <button onclick="sendLocation()">Отправить</button>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type');
-        let map = L.map('map').setView([50.4501, 30.5234], 13);  // Центр Киева по умолчанию
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        let marker = L.marker([50.4501, 30.5234], { draggable: true }).addTo(map);
+    <div id="map" style="width: 100%; height: 400px;"></div>
+    <button onclick="sendData()">Отправить</button>
 
-        marker.on('dragend', function(e) {
-            let coords = marker.getLatLng();
-            console.log(`New position: ${coords.lat}, ${coords.lng}`);
-        });
+    <script type="text/javascript">
+        let myPlacemark;
+        let currentCoords = [50.4501, 30.5234]; // Початкові координати (Київ)
 
-        function sendLocation() {
-            let coords = marker.getLatLng();
-            Telegram.WebApp.sendData(JSON.stringify({ lat: coords.lat, lon: coords.lng }));
-            Telegram.WebApp.close();
+        ymaps.ready(init);
+        function init() {
+            var myMap = new ymaps.Map("map", {
+                center: currentCoords,
+                zoom: 10
+            });
+
+            // Додаємо початкову метку, яку можна рухати
+            myPlacemark = new ymaps.Placemark(currentCoords, {}, {
+                draggable: true // Робимо метку рухомою
+            });
+
+            // Оновлюємо координати при перетягуванні метки
+            myPlacemark.events.add('dragend', function (e) {
+                currentCoords = myPlacemark.geometry.getCoordinates();
+            });
+
+            // Додаємо нову метку при кліку на карту
+            myMap.events.add('click', function (e) {
+                currentCoords = e.get('coords');
+                myPlacemark.geometry.setCoordinates(currentCoords); // Переміщуємо існуючу метку
+            });
+
+            myMap.geoObjects.add(myPlacemark);
+        }
+
+        function sendData() {
+            var data = {
+                lat: currentCoords[0],
+                lon: currentCoords[1]
+            };
+            Telegram.WebApp.sendData(JSON.stringify(data));
+            Telegram.WebApp.close(); // Закриваємо WebApp після відправки
         }
     </script>
 </body>
