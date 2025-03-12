@@ -8,9 +8,24 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        #map { width: 100%; height: 100vh; }
+        #map { width: 100%; height: 100vh; position: relative; z-index: 1; }
         body { margin: 0; padding: 0; }
-        button { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            padding: 15px 30px; 
+            font-size: 18px; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            z-index: 100000; /* Ещё выше, чтобы быть поверх Telegram */
+            display: block; 
+            visibility: visible !important; 
+        }
         button:hover { background-color: #45a049; }
     </style>
 </head>
@@ -19,31 +34,49 @@
     <button onclick="sendData()">Відправити</button>
     <script>
         console.log("Скрипт карты запущен");
-        let currentCoords = [50.4501, 30.5234]; // Киев по умолчанию
-        let map = L.map('map').setView(currentCoords, 10);
-        console.log("Карта инициализирована на координатах:", currentCoords);
+        let currentCoords = [50.4501, 30.5234];
+        try {
+            let map = L.map('map').setView(currentCoords, 10);
+            console.log("Карта инициализирована на координатах:", currentCoords);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-        console.log("Слой карты добавлен");
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+            console.log("Слой карты добавлен");
 
-        let marker = L.marker(currentCoords, { draggable: true }).addTo(map);
-        console.log("Метка добавлена на координаты:", currentCoords);
+            let marker = L.marker(currentCoords, { draggable: true }).addTo(map);
+            console.log("Метка добавлена на координаты:", currentCoords);
 
-        marker.on('dragend', function(e) {
-            currentCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
-            console.log("Метка перемещена на новые координаты:", currentCoords);
-        });
+            marker.on('dragend', function(e) {
+                currentCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
+                console.log("Метка перемещена на новые координаты:", currentCoords);
+            });
 
-        map.on('click', function(e) {
-            currentCoords = [e.latlng.lat, e.latlng.lng];
-            marker.setLatLng(e.latlng);
-            console.log("Клик по карте, метка перемещена на:", currentCoords);
-        });
+            map.on('click', function(e) {
+                currentCoords = [e.latlng.lat, e.latlng.lng];
+                marker.setLatLng(e.latlng);
+                console.log("Клик по карте, метка перемещена на:", currentCoords);
+            });
 
-        Telegram.WebApp.ready();
-        console.log("Telegram WebApp готов");
+            Telegram.WebApp.ready();
+            console.log("Telegram WebApp готов");
+
+            // Принудительно показываем кнопку после инициализации Telegram
+            setTimeout(function() {
+                const button = document.querySelector('button');
+                if (button) {
+                    console.log("Кнопка 'Відправити' найдена после Telegram WebApp");
+                    button.style.display = 'block';
+                    button.style.zIndex = '100000';
+                    button.style.position = 'fixed';
+                    button.style.bottom = '20px';
+                } else {
+                    console.error("Кнопка 'Відправити' не найдена после Telegram WebApp");
+                }
+            }, 500); // Даём Telegram время на загрузку
+        } catch (error) {
+            console.error("Ошибка инициализации карты:", error);
+        }
 
         function sendData() {
             const data = { lat: currentCoords[0], lon: currentCoords[1] };
@@ -52,6 +85,18 @@
             Telegram.WebApp.close();
             console.log("WebApp закрыт после отправки");
         }
+
+        // Проверка кнопки при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.querySelector('button');
+            if (button) {
+                console.log("Кнопка 'Відправити' найдена в DOM при загрузке");
+                button.style.display = 'block';
+                button.style.zIndex = '100000';
+            } else {
+                console.error("Кнопка 'Відправити' не найдена в DOM при загрузке");
+            }
+        });
     </script>
 </body>
 </html>
