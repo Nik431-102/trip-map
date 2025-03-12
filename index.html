@@ -10,28 +10,10 @@
     <style>
         #map { width: 100%; height: 100vh; position: relative; z-index: 1; }
         body { margin: 0; padding: 0; }
-        button { 
-            position: fixed; 
-            bottom: 20px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            padding: 15px 30px; 
-            font-size: 18px; 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            z-index: 100000; /* Ещё выше, чтобы быть поверх Telegram */
-            display: block; 
-            visibility: visible !important; 
-        }
-        button:hover { background-color: #45a049; }
     </style>
 </head>
 <body>
     <div id="map"></div>
-    <button onclick="sendData()">Відправити</button>
     <script>
         console.log("Скрипт карты запущен");
         let currentCoords = [50.4501, 30.5234];
@@ -61,42 +43,23 @@
             Telegram.WebApp.ready();
             console.log("Telegram WebApp готов");
 
-            // Принудительно показываем кнопку после инициализации Telegram
-            setTimeout(function() {
-                const button = document.querySelector('button');
-                if (button) {
-                    console.log("Кнопка 'Відправити' найдена после Telegram WebApp");
-                    button.style.display = 'block';
-                    button.style.zIndex = '100000';
-                    button.style.position = 'fixed';
-                    button.style.bottom = '20px';
-                } else {
-                    console.error("Кнопка 'Відправити' не найдена после Telegram WebApp");
-                }
-            }, 500); // Даём Telegram время на загрузку
+            // Настраиваем главную кнопку Telegram
+            Telegram.WebApp.MainButton.setText("Відправити");
+            Telegram.WebApp.MainButton.setParams({
+                color: "#4CAF50", // Зелёный фон
+                text_color: "#FFFFFF" // Белый текст
+            });
+            Telegram.WebApp.MainButton.show();
+            Telegram.WebApp.MainButton.onClick(function() {
+                const data = { lat: currentCoords[0], lon: currentCoords[1] };
+                console.log("Отправка данных в Telegram через MainButton:", data);
+                Telegram.WebApp.sendData(JSON.stringify(data));
+                Telegram.WebApp.close();
+            });
+
         } catch (error) {
             console.error("Ошибка инициализации карты:", error);
         }
-
-        function sendData() {
-            const data = { lat: currentCoords[0], lon: currentCoords[1] };
-            console.log("Отправка данных в Telegram:", data);
-            Telegram.WebApp.sendData(JSON.stringify(data));
-            Telegram.WebApp.close();
-            console.log("WebApp закрыт после отправки");
-        }
-
-        // Проверка кнопки при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            const button = document.querySelector('button');
-            if (button) {
-                console.log("Кнопка 'Відправити' найдена в DOM при загрузке");
-                button.style.display = 'block';
-                button.style.zIndex = '100000';
-            } else {
-                console.error("Кнопка 'Відправити' не найдена в DOM при загрузке");
-            }
-        });
     </script>
 </body>
 </html>
