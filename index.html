@@ -24,37 +24,21 @@
         }).addTo(map);
         let marker = L.marker(currentCoords, { draggable: true }).addTo(map);
 
-        // Обработка параметра type из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type'); // 'start' или 'end'
-        const pointType = type === 'start' ? 'відправлення' : 'прибуття';
-
         marker.on('dragend', function(e) {
             currentCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
-            marker.bindPopup(`Точка ${pointType}: ${currentCoords}`).openPopup();
         });
 
         map.on('click', function(e) {
             currentCoords = [e.latlng.lat, e.latlng.lng];
             marker.setLatLng(e.latlng);
-            marker.bindPopup(`Точка ${pointType}: ${currentCoords}`).openPopup();
         });
 
-        // Проверка доступности Telegram Web App
-        if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
-            alert("Помилка: Telegram Web App не доступний!");
-        } else {
-            Telegram.WebApp.ready();
-        }
+        Telegram.WebApp.ready();
 
         function sendData() {
             const data = { lat: currentCoords[0], lon: currentCoords[1] };
-            try {
-                Telegram.WebApp.sendData(JSON.stringify(data));
-                Telegram.WebApp.close();
-            } catch (e) {
-                alert("Помилка при відправці даних: " + e.message);
-            }
+            Telegram.WebApp.sendData(JSON.stringify(data));
+            Telegram.WebApp.close();
         }
     </script>
 </body>
