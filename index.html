@@ -40,21 +40,32 @@
                 console.log("Клик по карте, метка перемещена на:", currentCoords);
             });
 
+            Telegram.WebApp.onEvent('ready', function() {
+                console.log("Telegram WebApp полностью готов");
+            });
             Telegram.WebApp.ready();
-            console.log("Telegram WebApp готов");
+            console.log("Telegram WebApp инициализирован");
 
             // Настраиваем главную кнопку Telegram
             Telegram.WebApp.MainButton.setText("Відправити");
             Telegram.WebApp.MainButton.setParams({
-                color: "#4CAF50", // Зелёный фон
-                text_color: "#FFFFFF" // Белый текст
+                color: "#4CAF50",
+                text_color: "#FFFFFF"
             });
             Telegram.WebApp.MainButton.show();
+            console.log("Кнопка 'Відправити' настроена");
+
             Telegram.WebApp.MainButton.onClick(function() {
                 const data = { lat: currentCoords[0], lon: currentCoords[1] };
-                console.log("Отправка данных в Telegram через MainButton:", data);
-                Telegram.WebApp.sendData(JSON.stringify(data));
+                console.log("Нажата кнопка 'Відправити', данные:", data);
+                try {
+                    Telegram.WebApp.sendData(JSON.stringify(data));
+                    console.log("Данные успешно отправлены в Telegram:", JSON.stringify(data));
+                } catch (error) {
+                    console.error("Ошибка при отправке данных:", error);
+                }
                 Telegram.WebApp.close();
+                console.log("WebApp закрыт");
             });
 
         } catch (error) {
